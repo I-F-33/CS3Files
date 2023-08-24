@@ -8,24 +8,23 @@
 #include "../../includes/token/leftparen.h"
 #include "../../includes/token/rightparen.h"
 #include "../../includes/token/function.h"
-#include <cmath>
 
 using namespace std;
 
 class RPN
 {
-public:
-    RPN();
+    public:
 
-    RPN(Queue<Token *> &tokens);
+        RPN();
 
-    void set_input(Queue<Token *> &tokens);
+        RPN(Queue<Token*> &tokens);
 
-    float operator()(double x = 0);
+        void set_input(Queue<Token*> &tokens);
 
-    void set_tokens(Queue<Token *> tokens);
+        double operator()(double x = 0);
 
-private:
-    Queue<Token *> _tokens;
+    private:
+    
+            Queue<Token*> _tokens;
 };
 #endif // RPN_H

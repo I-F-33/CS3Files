@@ -10,15 +10,10 @@ using namespace std;
 template <class T>
 T* increase_size_if_need(T*a, int &size, int &capacity){
      // if there is only one more space available to fill, let user know there is limited space
-    if((size + 1) == capacity) {
-        cout << "Size has almost reached max capacity, there is one index left" << endl;
-    }
      if(size == capacity) {
-        cout << "Array has reached its max size, increasing size to " << capacity * 2 << endl;
-        T* new_list = reallocate(a,size,capacity * 2);
+        a = reallocate(a,size,capacity * 2);
         capacity += capacity;
-        cout << capacity << endl;
-        return new_list;
+        return a;
     }
     return a;
 }
@@ -28,11 +23,9 @@ T* reduce_size_if_need(T* a, int &size, int &capacity){
 
     // Reallocate array to 1/2 of used space if only 1/4th of capacity is being used
     if(size <= (.25 * capacity)) {
-        cout << "Only one fourth or less is being used in array, resizing by 1/2" << endl;
-        cout << "Capacity is now " << capacity/2 << endl;
-        T* new_list = reallocate(a, size, capacity/2);
+        a = reallocate(a, size, capacity/2);
         capacity -= capacity/2;
-        return new_list;
+        return a;
     }
 
     return a;
@@ -106,21 +99,16 @@ template <class T>
 T *insert_entry(T *list, const T &insert_this, int insert_here, int &size, int &capacity) {
 
     list = increase_size_if_need(list,size,capacity);
+
+    //shift right at the entry point to create a space for new element
+    shift_right(list,size,insert_here);
+
     //pointer pointing to the address of where to insert the new element
     T* entry_point = list + insert_here;
 
-    //shift right at the entry point to create a space for new element
-    shift_right(list,size,entry_point);
-
-    // duplicate is now set to the value of the desired new element
+    //duplicate is now set to the value of the desired new element
     *entry_point = insert_this;
 
-    //deleting pointer
-    delete entry_point;
-
-    // check if capacity needs to be increases, if then increase to capacity * 2 then return
-    // check if array is almost full, if it is then notify user
-    // else none then return array
     return list;
 }
 
@@ -131,14 +119,12 @@ T *erase_entry(T *list, int index, int &size, int &capacity) {
 
     assert(size > 0); //assert that there are elements in the array
 
+    
+    // Shift left and remove the value at the given index
+    shift_left(list, size, index);
+
     //reduce the size if only 1/4 of space or less than is used
     list = reduce_size_if_need(list, size, capacity);
-
-    //Pointer pointing to the address that needs to be removed
-    T* erase_here = list + index;
-
-    // Shift left and remove the value at the given index
-    shift_left(list,size,erase_here);
 
     // if used memory is less than 1/4 of array then reduce size else return the array
     return list;

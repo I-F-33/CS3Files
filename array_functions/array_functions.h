@@ -1,212 +1,223 @@
 #ifndef ARRAY_FUNCTIONS_H
 #define ARRAY_FUNCTIONS_H
-#include <cstdint>
-#include <iomanip>
+
+#include <cmath>
 #include <iostream>
+#include <iomanip>
+#include <set>
+#include <vector>
 #include <cassert>
 using namespace std;
 
+
 const int MINIMUM_CAPACITY = 3;
 
-// allocate 'capacity'
-//       elements.
-//   return array
-template <class T> T *allocate(int capacity = MINIMUM_CAPACITY) {
-  T *array = new T[capacity]; // Creates new dynamic array with size capacity
-  return array;
-}
+template<class T>      //copy from src to dest
+void copy_array(T* dest, const T* src, int many_to_copy)
+{
+    const T* walker_old = src;
+    T* walker_new = dest;
 
-// take array, resize it
-//   return new array.
-//   delete old array
-template <class T>
- T *reallocate(T *a, int size, int capacity) {
-  // creating new dynamic array of size
-  T *tempArray = new T[capacity];
-  // assigning all values of old array into new resized array
-  for (int i = 0; i < size; i++) {
-    tempArray[i] = a[i];
-  }
-  // deleting old array
-  // pointing old array ptr to new resized array
-  return tempArray;
-}
-
-// prints
-//   (size/capacity)
-//   for debugging
-template <class T>
-void print_array(T *a, int size, int capacity = 0) {
-  cout << "Printing Array...." << endl;
-  T *walker = a; // walker pointing to address of first index in array a
-  for (int i = 0; i < size; i++) {
-    cout << setw(8) << "[" << i << "] = " << *walker << endl;
-    walker++;
-  }
-  cout << "Printing array COMPLETE" << endl;
-}
-
-template <class T>
-void print(T *a, unsigned int how_many, ostream &outs = cout) {
-  outs << "Printing Array.....";
-  T *walker = a;
-  for (int i = 0; i < how_many; i++) {
-    outs << "[" << i << "] = [" << *walker << "]" << endl;
-    walker++;
-  }
-  outs << "Print Array COMPLETE";
-} // print array
-
-template <class T>
-T *search_entry(T *a, int size, const T &find_me) { // search for 'find me'
-  T *walker = a; // walker is pointing to the first address in given array
-
-  for (int i = 0; i < size; i++) {
-    if (*walker == find_me) { // if the value at walker is equal to he find_me
-      return walker;          // return the address of walker
+    for (int i = 0; i < many_to_copy; i++)
+    {
+        *walker_new = *walker_old;
+        walker_new++;
+        walker_old++;
     }
-    walker++;
-  }
-  return nullptr;
 }
 
-template <class T>
-int search(T *a, int size, const T &find_me) { // search for 'find me'
-  T *walker = a; // walker is pointing to the first index of array
+template <class T>                  //copies an array from another one, returns the array copy, placed atop to be used by other functions
+T* copy_array(const T* src, int size)
+{
+    T* array_copy = new T[size];
+    copy_array<T>(array_copy, src, size);
+    return array_copy;
 
-  for (int i = 0; i < size; i++) {
-    if (*walker == find_me) { // returns the index of where find_me is at
-      cout << "found at index [" << i << "]" << endl;
-      return i;
+}
+template<class T>   //allocates a dynamic array
+T* allocate(int capacity = MINIMUM_CAPACITY)
+{
+    bool debug = false;
+    if (debug) cout << "Allocate: Capacity " << capacity << endl;
+    return new T[capacity];
+}         
+
+template<class T>        //reallocates a dynamic array, preserves the contents
+T* reallocate(T* a, int size, int capacity)
+{
+
+    T* new_array = allocate<T>(capacity);
+    copy_array<T>(new_array, a, size);
+    delete[] a;
+    return new_array;
+}
+
+
+
+template <class T>  //prints debug information to terminal
+void print(T* a, unsigned int how_many, ostream& outs = cout)
+{
+
+        cout << "[";
+
+        for (int i = 0; i < how_many; i++)
+        {
+            cout << *a << " ";
+            a++;
+        }
+
+        cout << "]" << endl;
+}
+
+template<class T>  //prints an array to terminal
+void print_array(T* a, int size, int capacity = 0, ostream& outs = cout)
+{
+        cout << "( " << size << "/" << capacity << ")";
+
+        print(a, size, outs);
+}
+
+template<class T>      //returns the address/pointer of the found element
+T* search_entry(T* a, int size, const T& find_me)
+{
+        T* walker = a;
+        for (int i = 0; i < size; i++)
+        {
+            if (*walker == find_me)
+            {
+                return walker;
+            }
+            walker++;
+        }
+        return nullptr;
+}
+
+template <class T>             //returns the index of the found element
+int search(T* a, int size, const T& find_me)
+    {
+        T* index_pointer = search_entry<T>(a, size, find_me);
+        if (index_pointer == 0) return -1;
+        int index_value = index_pointer - a;
+        return index_value;
     }
-    walker++;
-  }
-  return -1;
+
+template <class T>       //shifts an array 'to the right' makes a duplicate at the shift-point. Shifts at a POINTER
+void shift_right(T *a, int &size, T* shift_here)
+{
+    if (size <= 0) return; // expels invalid indicies
+
+     size++; // increase size
+
+        T* stop_condition = shift_here;
+
+        T* current_cell = a + size - 1; // might not work, try cout
+
+        T* next_cell = current_cell - 1;
+
+        while (current_cell != stop_condition)
+        {
+            *current_cell = *next_cell;
+            current_cell--;
+            next_cell--;
+        }
+
+        return;
 }
 
-template <class T>
-void shift_left(T *a, int &size, int shift_here) { // shift left @ pos:
- //if given index is negative
-assert(shift_here >= 0);
-// if index is out of range
-assert(shift_here < size);
 
-// flag at end of the array
-T* end = a + (size - 1);
+template <class T>      //shifts an array 'to the right' makes a duplicate at the shift-point. Shifts at an INDEX
+void shift_right(T *a, int &size, int shift_here)
+{
+    if (size <= 0) return; // expels invalid indicies
 
-// walker for array at given index
-T* walker = a + shift_here;
+     size++; // increase size
 
-//2nd walker ahead one index, used to shift elements
-T* walker_2 = walker + 1;
+        //stop condition is the index of the shift point
+        T* stop_condition = a + shift_here;
 
-while(walker != end) {
-  //shift elements
-  *walker = *walker_2;
-  walker++;
-  walker_2++;
+        //current cell is the last cell in the array
+        T* current_cell = a + size - 1;
+
+        //next cell is the cell before the current cell
+        T* next_cell = current_cell - 1;
+
+        //while the current cell is not the stop condition
+        while (current_cell != stop_condition)
+        {
+            //copy the value of the next cell to the current cell
+            *current_cell = *next_cell;
+            current_cell--;
+            next_cell--;
+        }
+
+        return;
 }
 
-//reduce size of array
-size--; 
-}
 
-template <class T>
-void shift_left(T *a, int &size, T *shift_here) { // shift left @ pos:
-  
-  int shift_at = shift_here - a;
-  shift_left(a, size, shift_at);
-}
+template <class T>        //shift left @ pos: errases posistion and lowers size SHIFTS AT POINTER
+void shift_left(T* a, int& size, T* shift_here)
+{
+    T* current_cell = shift_here;
+    T* next_cell = current_cell + 1;
 
-template <class T> 
-void shift_right(T *a, int &size, int shift_here) {
-  // edge case
-  if (shift_here >= size || size == 0) { // if shifting right at last element
+    T* end_of_array = a + size - 1;
+
+
+    while (current_cell != end_of_array)
+    {
+            *current_cell = *next_cell;
+            current_cell++;
+            next_cell++;
+    }
+
+        size--; // increase size
+
     return;
-  }
 
-  size++; // increase size to fit value at former highest index  at new highest
-          // index
-
-  T *walker = a + size;            // pointing to address where need to shift
-  T *ptr_next_walker = walker + 1; // pointing to address next(right) of walker
-
-  for (int i = size; i >= shift_here; i--) {
-    *ptr_next_walker = *walker; // value of new unused address = former value of
-                                // last used address
-
-    ptr_next_walker--; // now at former largest size
-    walker--;          // now one slot to the left of ptr_next_walker
-  }
 }
 
-// shift right:
-//    make a hole
-template <class T>
-void shift_right(T *a, int &size, T *shift_here) {
-  int shift_at = shift_here - a;
+template <class T>       //shift left @ pos: errases posistion and lowers size SHIFTS AT AN INDEX
+void shift_left(T* a, int& size, int shift_here)
+{
+    T* current_cell = a + shift_here;
+    T* next_cell = current_cell + 1;
 
-  shift_right(a, size, shift_at);
-}
+    T* end_of_array = a + size - 1;
 
-// copy from src to dest
-template <class T> void copy_array(T *dest, const T *src, int many_to_copy) {
-  T *destination_walker = dest; // pointer for the start of dest array
-  const T *source_walker = src; // pointer for the start of source array
-
-  for (int i = 0; i < many_to_copy;
-       i++) { // loops for (many_to_copy) amount of times
-    *destination_walker =
-        *source_walker;   // values of address at destination walker = value of
-                          // address at source walker
-    destination_walker++; // increment each pointer to continue copying values
-    source_walker++;
-  }
-}
-
-template <class T>
-T *copy_array(const T *src, int size) { // return a copy of src
-  if (size == 0) {
-    return nullptr;
-  }
-  T *copy_of_src = new T[size]; // copy of source array
-  const T *walker_src = src;    // walkers for the copy array and source array
-  T *walker_copy = copy_of_src;
-
-  for (int i = 0; i < size; i++) { // copy element from src array to copy array
-                                   // for (Size) number of times
-    *walker_copy = *walker_src;
-    walker_copy++;
-    walker_src++;
-  }
-  return copy_of_src;
-}
-
-template <class T>
-string array_string(const T *a, int size) { // return array as a string
-  if (size == 0) {
-    return "";
-  }
-  // creating a empty string to
-  const T *walker = a;
-  string output = "";
-
-  char character;
-
-  for (int i = 0; i < size; i++, walker++) {
-    // If the array is made up of characters
-    if (isalpha(*walker)) {
-      // append character to string
-      character = *walker;
-
-      output = output + character;
-    } else {
-      // if the array is made up of ints, doubles , etc..
-      output = output  + to_string(*walker);
+    while (current_cell != end_of_array)
+    {
+            *current_cell = *next_cell;
+            current_cell++;
+            next_cell++;
     }
-  }
+        size--; // increase size
+    return;
 
-  return output;
 }
 
+template <class T>              //current implementation is shit, does not adequately differentiate "int" and "char" -- currently outputs ASCII values :()
+string array_string(const T *a, int size)
+{
+
+    const T* walker = a;
+    string return_me = "[";
+    char char_value;
+
+    for (int i = 0; i < size; i++)
+    {
+        if (isalpha(*walker))
+        {
+            char_value = *walker;
+            return_me += char_value;
+        }
+        else
+        {
+            return_me += " " + to_string(*walker);
+        }
+        walker++;
+    }
+
+    return return_me;
+
+}
 #endif

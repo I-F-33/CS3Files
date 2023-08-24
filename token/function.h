@@ -4,6 +4,7 @@
 #include "operator.h"
 #include <iostream>
 #include <string>
+#include "constants.h"
 using namespace std;
 
 class Function : public Operator

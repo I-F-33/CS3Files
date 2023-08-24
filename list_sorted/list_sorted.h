@@ -77,7 +77,7 @@ public:
 
     List(const List<T> &copyThis)
     {
-        _head_ptr = _copy_list(copyThis._head_ptr);
+        _head_ptr = _copy_list(copyThis._head_ptr, _head_ptr);
         _size = copyThis._size;
         _order = copyThis._order;
         _unique = copyThis._unique;
@@ -103,7 +103,7 @@ public:
     Iterator insert_and_add(const T &i) // Insert i
     {
         _size++;
-        return _insert_sorted_and_add(_head_ptr, i, _order);
+        return _insert_sorted_and_add(_head_ptr, i, _unique);
     }
 
     T Delete(List<T>::Iterator iMarker) // delete node at marker

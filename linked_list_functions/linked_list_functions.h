@@ -95,7 +95,7 @@ node<ITEM_TYPE> *_insert_after(node<ITEM_TYPE> *&head, node<ITEM_TYPE> *after_th
 {
     if (head == nullptr)
     {
-        return nullptr;
+        return _insert_head(head, insert_this);
     }
 
     // new node to be inserted
@@ -110,7 +110,7 @@ node<ITEM_TYPE> *_insert_after(node<ITEM_TYPE> *&head, node<ITEM_TYPE> *after_th
     // After this is now pointing to the new node
     after_this->_next = new_node;
 
-    return head;
+    return new_node;
 }
 
 // ptr to previous node
@@ -252,14 +252,20 @@ node<T> *_copy_list(node<T> *&dest, node<T> *src)
         return nullptr;
     }
 
+    // copy the list
     dest = _copy_list(src);
 
-    while (dest->_next != nullptr)
+    // copy of the dest
+    node<T>* dest_copy = dest;
+
+    // while the next node is not a nullptr
+    while (dest_copy->_next != nullptr)
     {
-        dest = dest->_next;
+        dest_copy = dest_copy->_next;
     }
 
-    return dest;
+    // return the last node of the copy
+    return dest_copy;
 }
 
 // delete all the nodes

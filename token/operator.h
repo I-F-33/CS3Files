@@ -2,6 +2,7 @@
 #define OPERATOR_H
 #include <cmath>
 #include "token.h"
+#include "constants.h"
 #include <iostream>
 #include <string>
 

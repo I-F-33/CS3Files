@@ -8,7 +8,7 @@
 #include "../token/leftparen.h"
 #include "../token/rightparen.h"
 #include "../token/function.h"
-#include "../token/tk_constants.h"
+#include "../token/constants.h"
 
 class ShuntingYard
 {
